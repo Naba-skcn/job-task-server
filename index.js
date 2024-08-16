@@ -39,28 +39,35 @@ const carsCollection = client.db('carDB').collection('cars');
 
 //apis
 app.get('/cars', async (req, res) => {
-    const page = parseInt(req.query.page) || 1; 
-    const limit = parseInt(req.query.limit) || 10;
-    const searchQuery = req.query.search || ''; 
-    const sortField = req.query.sortField || ''; 
-    const sortOrder = req.query.sortOrder || ''; 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const searchQuery = req.query.search || '';
+    const sortField = req.query.sortField || 'ProductCreationDateTime';
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+    const brand = req.query.brand || '';
+    const category = req.query.category || '';
+    const priceRange = req.query.priceRange || '';
 
-    const skip = (page - 1) * limit; 
+    const skip = (page - 1) * limit;
 
-    // Search for products by name (case-insensitive)
-    const query = searchQuery ? { ProductName: { $regex: searchQuery, $options: 'i' } } : {};
+    let query = searchQuery ? { ProductName: { $regex: searchQuery, $options: 'i' } } : {};
 
-    // Build the sort object
-    let sort = {};
-    if (sortField && sortOrder) {
-        sort[sortField] = sortOrder === 'asc' ? 1 : -1;
+    if (brand) query.BrandName = brand;
+    if (category) query.Category = category;
+    if (priceRange) {
+        const [minPrice, maxPrice] = priceRange.split('-').map(Number);
+        query.Price = { $gte: minPrice, $lte: maxPrice };
     }
 
     const totalItems = await carsCollection.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
-    const result = await carsCollection.find(query).sort(sort).skip(skip).limit(limit).toArray();
-    
+    const result = await carsCollection.find(query)
+        .sort({ [sortField]: sortOrder })
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+
     res.send({
         totalItems,
         totalPages,
