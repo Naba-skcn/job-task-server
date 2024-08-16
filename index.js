@@ -41,12 +41,25 @@ const carsCollection = client.db('carDB').collection('cars');
 app.get('/cars', async (req, res) => {
     const page = parseInt(req.query.page) || 1; 
     const limit = parseInt(req.query.limit) || 10;
+    const searchQuery = req.query.search || ''; 
+    const sortField = req.query.sortField || ''; 
+    const sortOrder = req.query.sortOrder || ''; 
+
     const skip = (page - 1) * limit; 
 
-    const totalItems = await carsCollection.countDocuments();
+    // Search for products by name (case-insensitive)
+    const query = searchQuery ? { ProductName: { $regex: searchQuery, $options: 'i' } } : {};
+
+    // Build the sort object
+    let sort = {};
+    if (sortField && sortOrder) {
+        sort[sortField] = sortOrder === 'asc' ? 1 : -1;
+    }
+
+    const totalItems = await carsCollection.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
-    const result = await carsCollection.find().skip(skip).limit(limit).toArray();
+    const result = await carsCollection.find(query).sort(sort).skip(skip).limit(limit).toArray();
     
     res.send({
         totalItems,
@@ -55,6 +68,7 @@ app.get('/cars', async (req, res) => {
         items: result
     });
 });
+
 
 
 app.get('/', (req,res) =>{
