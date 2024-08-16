@@ -39,9 +39,22 @@ const carsCollection = client.db('carDB').collection('cars');
 
 //apis
 app.get('/cars', async (req, res) => {
-    const result = await carsCollection.find().toArray();
-    res.send(result);
-  });
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit; 
+
+    const totalItems = await carsCollection.countDocuments();
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const result = await carsCollection.find().skip(skip).limit(limit).toArray();
+    
+    res.send({
+        totalItems,
+        totalPages,
+        currentPage: page,
+        items: result
+    });
+});
 
 
 app.get('/', (req,res) =>{
