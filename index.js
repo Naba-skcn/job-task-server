@@ -36,7 +36,6 @@ async function run() {
 }
 run().catch(console.dir);
 const carsCollection = client.db('carDB').collection('cars');
-const carCollection = client.db('carDB').collection('cars');
 
 // APIs
 app.get('/cars', async (req, res) => {
