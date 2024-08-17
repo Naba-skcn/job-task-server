@@ -76,13 +76,6 @@ app.get('/cars', async (req, res) => {
     });
 });
 
-app.get('/', (req,res) =>{
-    res.send('Job task server is running')
-    })
-    
-    app.listen(port, ()=>{
-        console.log(`server is running on port: ${port}`)
-    })
 
 
     
