@@ -37,7 +37,7 @@ async function run() {
 run().catch(console.dir);
 const carsCollection = client.db('carDB').collection('cars');
 
-//apis
+// APIs
 app.get('/cars', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 9;
@@ -75,8 +75,6 @@ app.get('/cars', async (req, res) => {
         items: result
     });
 });
-
-
 
 app.get('/', (req,res) =>{
     res.send('Job task server is running')
